@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ATHARVA">
+<meta name="theme-color" content="#7c3aed">
+<meta name="description" content="ATHARVA — Cognitive Operating Architecture">
+
+<title>ATHARVA v5.0</title>
+
+<!-- PWA Manifest -->
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+
+<!-- Stylesheet -->
+<link rel="stylesheet" href="css/styles.css">
+
+<style>
+:root{
+  --bg:#0a0a0f;--bg2:#0f0f1a;--bg3:#141420;
+  --text:#e2e8f0;--muted:#64748b;--muted2:#475569;
+  --border:#1e1e2e;--border2:#252535;
+  --violet:#7c3aed;--cyan:#06b6d4;--gold:#f59e0b;
+  --green:#10b981;--red:#ef4444;--blue:#3b82f6;
+  --display:'Space Grotesk',system-ui,sans-serif;
+  --mono:'JetBrains Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--display)}
+body{display:flex;flex-direction:column}
+
+/* Header */
+.header{background:var(--bg2);border-bottom:1px solid var(--border);padding:8px 14px;display:flex;align-items:center;gap:10px;flex-shrink:0;position:sticky;top:0;z-index:100}
+.logo{font-size:.95rem;font-weight:800;letter-spacing:3px;background:linear-gradient(135deg,var(--violet),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.logo-sub{font-size:.5rem;letter-spacing:2px;color:var(--muted);margin-top:-2px}
+.ver-tag{font-size:.58rem;padding:2px 7px;border:1px solid var(--violet);border-radius:10px;color:var(--violet);margin-left:4px}
+.status-dot{width:7px;height:7px;border-radius:50%;background:var(--green);margin-left:auto;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+#sys-label{font-size:.55rem;color:var(--muted2);margin-left:4px}
+
+/* Navigation */
+.nav-wrap{flex-shrink:0}
+.tabs{display:flex;background:var(--bg2);border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex-shrink:0;padding:9px 13px;font-size:.62rem;letter-spacing:1px;background:none;border:none;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:.2s;font-family:var(--display)}
+.tab.active{color:var(--cyan);border-bottom-color:var(--cyan)}
+.tab:active{background:var(--bg3)}
+
+/* Content */
+.content{flex:1;overflow-y:auto;padding:12px;scrollbar-width:thin;scrollbar-color:var(--border2) transparent}
+
+/* Panel */
+.panel{display:none}
+.panel.active{display:block}
+
+/* Card */
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;margin-bottom:12px}
+.card-title{font-size:.65rem;font-weight:700;letter-spacing:2px;color:var(--violet);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+
+/* Input */
+.input-field{width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;padding:9px 11px;color:var(--text);font-size:.75rem;font-family:var(--display);outline:none;resize:none}
+.input-field:focus{border-color:var(--violet)}
+
+/* Buttons */
+.btn{padding:8px 14px;border-radius:6px;border:none;font-size:.68rem;font-family:var(--display);cursor:pointer;font-weight:600;letter-spacing:.5px;transition:.15s}
+.btn:active{opacity:.8;transform:scale(.97)}
+.btn-v{background:var(--violet);color:#fff}
+.btn-c{background:var(--cyan);color:#000}
+.btn-g{background:var(--green);color:#000}
+.btn-r{background:var(--red);color:#fff}
+.btn-ghost{background:transparent;border:1px solid var(--border2);color:var(--muted)}
+.btn-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+
+/* Chat */
+.chat-wrap{max-height:340px;overflow-y:auto;margin-bottom:10px;padding-right:4px}
+.bubble{margin:6px 0;max-width:88%;clear:both}
+.bubble.user{float:right;background:var(--violet);color:#fff;padding:8px 11px;border-radius:12px 12px 3px 12px;font-size:.73rem;line-height:1.5}
+.bubble.entity{float:left;background:var(--bg3);color:var(--text);padding:8px 11px;border-radius:12px 12px 12px 3px;font-size:.73rem;line-height:1.5;border:1px solid var(--border)}
+.clearfix::after{content:'';display:block;clear:both}
+.typing{display:inline-flex;gap:4px;padding:10px}
+.typing span{width:6px;height:6px;background:var(--muted);border-radius:50%;animation:bounce .9s infinite}
+.typing span:nth-child(2){animation-delay:.15s}
+.typing span:nth-child(3){animation-delay:.3s}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+
+/* UTA bar */
+.uta-bar{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;margin-bottom:8px}
+.uta-axis{background:var(--bg3);border-radius:4px;padding:4px 5px;text-align:center}
+.uta-axis-label{font-size:.48rem;color:var(--muted2);letter-spacing:1px;margin-bottom:2px}
+.uta-axis-val{font-size:.7rem;font-weight:700;color:var(--cyan)}
+.uta-fill{height:3px;border-radius:2px;background:var(--border2);overflow:hidden;margin-top:2px}
+.uta-fill-bar{height:100%;background:var(--violet);border-radius:2px;transition:width .4s}
+
+/* Misc */
+.ts{font-size:.52rem;color:var(--muted2)}
+.clearfix-div{clear:both}
+</style>
+</head>
+<body>
+
+<!-- ── Header ── -->
+<header class="header">
+  <div>
+    <div class="logo">A T H A R V A</div>
+    <div class="logo-sub">COGNITIVE OS v5.0</div>
+  </div>
+  <span class="ver-tag" id="ver-tag">v5.0</span>
+  <div style="margin-left:auto;display:flex;align-items:center;gap:6px">
+    <div class="status-dot"></div>
+    <span id="sys-label" style="font-size:.55rem;color:var(--muted2)">BOOTING</span>
+  </div>
+</header>
+
+<!-- ── Main Navigation ── -->
+<div class="nav-wrap">
+  <nav class="tabs" id="nav-main">
+    <button class="tab active" onclick="switchTab('entity',this)">◈ ENTITY</button>
+    <button class="tab" onclick="switchTab('oracle',this)">🔮 ORACLE</button>
+    <button class="tab" id="tab-system-btn" onclick="toggleSystem(this)" style="margin-left:auto;color:var(--muted)">⚙ SYSTEM ▸</button>
+  </nav>
+  <nav class="tabs" id="nav-system" style="display:none;background:var(--bg3);border-bottom:1px solid rgba(124,58,237,.2)">
+    <button class="tab" onclick="switchTab('uta',this)">🧠 UTA</button>
+    <button class="tab" onclick="switchTab('memory',this)">📜 MEM</button>
+    <button class="tab" onclick="switchTab('kernel',this)">⚡ KERNEL</button>
+    <button class="tab" onclick="switchTab('civilization',this)">⚔️ CIV</button>
+    <button class="tab" onclick="switchTab('god',this)">👁 GOD</button>
+    <button class="tab" onclick="switchTab('upgrade',this)">🔧 UPG</button>
+    <button class="tab" onclick="switchTab('judge',this)">⚖️ JUDGE</button>
+    <button class="tab" onclick="switchTab('coord',this)">🧭 COORD</button>
+    <button class="tab" onclick="switchTab('test',this)">🧪 TEST</button>
+    <button class="tab" onclick="switchTab('settings',this)">⚙️ CFG</button>
+  </nav>
+</div>
+
+<!-- ── Content Panels ── -->
+<div class="content" id="main-content">
+
+<!-- ENTITY Panel -->
+<div id="panel-entity" class="panel active">
+  <div class="card" style="border-color:rgba(124,58,237,.4)">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+      <div style="width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--violet),var(--cyan));display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0">◈</div>
+      <div>
+        <div style="font-weight:700;font-size:.82rem">ATHARVA</div>
+        <div style="font-size:.6rem;color:var(--muted2)">co-pilot — not assistant, not servant</div>
+      </div>
+      <div style="margin-left:auto;text-align:right">
+        <div style="font-size:.52rem;color:var(--muted2)">EPISODES</div>
+        <div style="font-size:.85rem;font-weight:700;color:var(--cyan)" id="ep-count">0</div>
+      </div>
+    </div>
+    <!-- UTA State Bar -->
+    <div class="uta-bar" id="uta-bar-entity">
+      <div class="uta-axis"><div class="uta-axis-label">E</div><div class="uta-axis-val" id="uta-E">0.50</div><div class="uta-fill"><div class="uta-fill-bar" id="bar-E" style="width:50%"></div></div></div>
+      <div class="uta-axis"><div class="uta-axis-label">D</div><div class="uta-axis-val" id="uta-D">0.50</div><div class="uta-fill"><div class="uta-fill-bar" id="bar-D" style="width:50%;background:var(--blue)"></div></div></div>
+      <div class="uta-axis"><div class="uta-axis-label">S</div><div class="uta-axis-val" id="uta-S">0.65</div><div class="uta-fill"><div class="uta-fill-bar" id="bar-S" style="width:65%;background:var(--green)"></div></div></div>
+      <div class="uta-axis"><div class="uta-axis-label">P</div><div class="uta-axis-val" id="uta-P">0.10</div><div class="uta-fill"><div class="uta-fill-bar" id="bar-P" style="width:10%;background:var(--gold)"></div></div></div>
+      <div class="uta-axis"><div class="uta-axis-label">I</div><div class="uta-axis-val" id="uta-I">0.50</div><div class="uta-fill"><div class="uta-fill-bar" id="bar-I" style="width:50%;background:var(--red)"></div></div></div>
+    </div>
+  </div>
+
+  <!-- Chat -->
+  <div class="card" style="padding:10px">
+    <div class="chat-wrap" id="chat-feed">
+      <div class="bubble entity">Namaste. I am ATHARVA — your cognitive co-pilot. Kuch bhi pucho, kisi bhi language mein.</div>
+      <div class="clearfix-div"></div>
+    </div>
+    <div id="forecast-bar" style="display:none;font-size:.6rem;color:var(--gold);background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2);border-radius:5px;padding:5px 8px;margin-bottom:8px"></div>
+    <textarea id="entity-input" class="input-field" rows="2" placeholder="Type anything… English, Hindi, Hinglish sab chalta hai"></textarea>
+    <div class="btn-row">
+      <button class="btn btn-v" onclick="entitySpeak()" style="flex:1">◈ SPEAK</button>
+      <button class="btn btn-ghost" onclick="entityClearChat()" style="padding:8px 10px">✕</button>
+    </div>
+  </div>
+</div>
+
+<!-- KERNEL Panel -->
+<div id="panel-kernel" class="panel">
+  <div class="card" style="border-color:rgba(6,182,212,.4)">
+    <div class="card-title" style="color:var(--cyan)">⚡ KERNEL v2.0 — Language/Intent Router</div>
+    <div style="font-size:.62rem;color:var(--muted2);line-height:1.5">Supports: English · Hindi · Hinglish · Tamil · Telugu · Technical<br>S-gate: <span style="color:var(--green)">0.20</span> · Distress always bypasses gate</div>
+  </div>
+  <div class="card">
+    <div class="card-title">🔍 LIVE PROBE</div>
+    <input id="kernel-probe-input" class="input-field" placeholder="Type anything to probe language + intent…">
+    <div class="btn-row"><button class="btn btn-c" onclick="kernelProbe()" style="font-size:.63rem">⚡ PROBE</button></div>
+    <div id="kernel-probe-result" style="margin-top:10px"></div>
+  </div>
+  <div class="card">
+    <div class="card-title" style="color:var(--gold)">🌐 LANGUAGE STATS
+      <button class="btn btn-ghost" style="margin-left:auto;font-size:.55rem;padding:2px 7px" onclick="kernelRenderStats()">↺</button>
+    </div>
+    <div id="kernel-lang-stats" style="font-size:.65rem;color:var(--muted2)">Process inputs first.</div>
+  </div>
+  <div class="card">
+    <div class="card-title" style="color:var(--violet)">📡 ROUTE LOG
+      <button class="btn btn-ghost" style="margin-left:auto;font-size:.55rem;padding:2px 7px" onclick="KERNEL.clearLog();KERNEL.renderLog('kernel-route-log')">CLEAR</button>
+    </div>
+    <div id="kernel-route-log" style="max-height:250px;overflow-y:auto"></div>
+  </div>
+</div>
+
+<!-- UTA Panel -->
+<div id="panel-uta" class="panel">
+  <div class="card">
+    <div class="card-title">🧠 UTA STATE</div>
+    <div id="uta-full-display" style="font-size:.65rem;color:var(--muted2)">Loading...</div>
+    <div class="btn-row">
+      <button class="btn btn-ghost" onclick="renderUTAFull()" style="font-size:.62rem">↺ REFRESH</button>
+      <button class="btn btn-ghost" onclick="ATH_STATE.reset();renderUTAFull()" style="font-size:.6rem">RESET</button>
+    </div>
+  </div>
+</div>
+
+<!-- MEMORY Panel -->
+<div id="panel-memory" class="panel">
+  <div class="card">
+    <div class="card-title">📜 PERMANENT MEMORY
+      <button class="btn btn-ghost" style="margin-left:auto;font-size:.55rem;padding:2px 7px" onclick="renderMemory()">↺</button>
+    </div>
+    <div id="mem-list" style="max-height:300px;overflow-y:auto;font-size:.65rem;color:var(--muted2)">Loading...</div>
+  </div>
+  <div class="card">
+    <div class="card-title">📅 EPISODES</div>
+    <div id="ep-list" style="max-height:200px;overflow-y:auto;font-size:.65rem;color:var(--muted2)">Loading...</div>
+  </div>
+</div>
+
+<!-- COORD Panel -->
+<div id="panel-coord" class="panel">
+  <div class="card" style="border-color:rgba(245,158,11,.3)">
+    <div class="card-title" style="color:var(--gold)">🧭 COORDINATION CORE v4.2</div>
+  </div>
+  <div class="card">
+    <div class="card-title" style="color:var(--cyan)">⚡ ROUTER STATS
+      <button class="btn btn-ghost" style="margin-left:auto;font-size:.55rem;padding:2px 7px" onclick="coordRenderRouteStats()">↺</button>
+    </div>
+    <div id="coord-route-stats" style="font-size:.65rem;color:var(--muted2)">Tap ↺ to load.</div>
+  </div>
+  <div class="card">
+    <div class="card-title" style="color:var(--green)">📋 DECISION LOG
+      <button class="btn btn-ghost" style="margin-left:auto;font-size:.55rem;padding:2px 7px" onclick="coordRenderDecisionLog()">↺</button>
+    </div>
+    <div id="coord-decision-stats" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px"></div>
+    <div id="coord-decision-log" style="max-height:250px;overflow-y:auto;font-size:.65rem;color:var(--muted2)">Tap ↺ to load.</div>
+  </div>
+</div>
+
+<!-- Settings Panel -->
+<div id="panel-settings" class="panel">
+  <div class="card">
+    <div class="card-title">⚙️ API CONFIGURATION</div>
+    <div style="font-size:.65rem;color:var(--green);background:rgba(16,185,129,.07);border:1px solid rgba(16,185,129,.2);border-radius:5px;padding:7px 10px;margin-bottom:10px;line-height:1.6">
+      🆓 <strong>Groq is free</strong> — add key for AI responses. Works offline in mock mode.
+    </div>
+    <label style="font-size:.62rem;color:var(--muted2)">Groq API Key</label>
+    <input id="cfg-groq" class="input-field" type="password" placeholder="gsk_..." style="margin-top:4px;margin-bottom:10px">
+    <label style="font-size:.62rem;color:var(--muted2)">Backend URL (optional)</label>
+    <input id="cfg-backend" class="input-field" placeholder="https://your-app.onrender.com" style="margin-top:4px;margin-bottom:10px">
+    <div class="btn-row">
+      <button class="btn btn-g" onclick="saveCfg()" style="font-size:.63rem">💾 SAVE</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">📱 APK INFO</div>
+    <div style="font-size:.63rem;color:var(--muted2);line-height:1.7">
+      Version: <span style="color:var(--cyan)">5.0.0</span><br>
+      Build: <span style="color:var(--gold)">PWA + Android WebView</span><br>
+      Offline: <span style="color:var(--green)">✓ Service Worker Active</span><br>
+      Storage: <span id="cfg-storage-status" style="color:var(--green)">checking...</span>
+    </div>
+  </div>
+</div>
+
+<!-- Test Panel -->
+<div id="panel-test" class="panel">
+  <div class="card" style="border-color:rgba(239,68,68,.3)">
+    <div class="card-title" style="color:var(--red)">🧪 TEST SUITE</div>
+    <div style="font-size:.63rem;color:var(--muted2);margin-bottom:10px">Run diagnostics on all ATHARVA modules.</div>
+    <div class="btn-row">
+      <button class="btn btn-r" onclick="runSelfTest()" style="font-size:.63rem">▶ RUN ALL</button>
+    </div>
+    <div id="test-results" style="margin-top:10px;font-size:.65rem;color:var(--muted2)"></div>
+  </div>
+</div>
+
+<!-- Oracle Panel -->
+<div id="panel-oracle" class="panel">
+  <div class="card">
+    <div class="card-title" style="color:var(--gold)">🔮 ORACLE</div>
+    <div id="oracle-feed" style="max-height:300px;overflow-y:auto;font-size:.7rem;color:var(--muted2);margin-bottom:10px">Ask ORACLE anything...</div>
+    <input id="oracle-input" class="input-field" placeholder="Oracle question...">
+    <div class="btn-row"><button class="btn btn-ghost" onclick="oracleAsk()" style="font-size:.63rem">🔮 ASK</button></div>
+  </div>
+</div>
+
+<!-- Stub panels -->
+<div id="panel-civilization" class="panel"><div class="card"><div class="card-title">⚔️ CIVILIZATION — CIV DEBATE</div><div style="font-size:.65rem;color:var(--muted2)">Debate system — configure API key first.</div></div></div>
+<div id="panel-god" class="panel"><div class="card"><div class="card-title">👁 GOD LAYER</div><div style="font-size:.65rem;color:var(--muted2)">Meta-governance — requires stable S > 0.5.</div></div></div>
+<div id="panel-upgrade" class="panel"><div class="card"><div class="card-title">🔧 UPGRADE ENGINE</div><div style="font-size:.65rem;color:var(--muted2)">AI-generated patches — configure API key first.</div></div></div>
+<div id="panel-judge" class="panel"><div class="card"><div class="card-title">⚖️ MULTI-JUDGE</div><div style="font-size:.65rem;color:var(--muted2)">6-judge governance — active on all mutations.</div></div></div>
+
+</div><!-- end .content -->
+
+<!-- JS: Load order matters. storage → kernel → core → memory → ui → agents → boot -->
+<script src="js/storage.js"></script>
+<script src="js/kernel.js"></script>
+<script src="js/core.js"></script>
+<script src="js/civilization.js"></script>
+<script src="js/memory.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/agents.js"></script>
+<script src="js/boot.js"></script>
+
+<script>
+// ── Inline glue — minimal, no modules ─────────────────────────
+
+function escHtml(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function toggleSystem(btn){
+  var sys  = document.getElementById('nav-system');
+  var open = sys.style.display !== 'none';
+  sys.style.display = open ? 'none' : 'flex';
+  btn.textContent   = open ? '⚙ SYSTEM ▸' : '⚙ SYSTEM ▾';
+  btn.style.color   = open ? 'var(--muted)' : 'var(--cyan)';
+}
+
+function switchTab(name, el) {
+  var target = document.getElementById('panel-' + name);
+  if(!target){ console.warn('[switchTab] missing panel: panel-' + name); return; }
+  var panels = document.querySelectorAll('.panel');
+  for(var i=0;i<panels.length;i++) panels[i].classList.remove('active');
+  var tabs = document.querySelectorAll('.tab');
+  for(var j=0;j<tabs.length;j++) tabs[j].classList.remove('active');
+  target.classList.add('active');
+  if(el){ el.classList.add('active'); }
+  if(name === 'entity' || name === 'oracle'){
+    var sys = document.getElementById('nav-system');
+    var btn = document.getElementById('tab-system-btn');
+    if(sys) sys.style.display = 'none';
+    if(btn){ btn.textContent = '⚙ SYSTEM ▸'; btn.style.color = 'var(--muted)'; }
+  }
+  if(name === 'uta')    { try { renderUTAFull();          } catch(e){} }
+  if(name === 'memory') { try { renderMemory();           } catch(e){} }
+  if(name === 'kernel') { try { KERNEL.renderLog('kernel-route-log'); kernelRenderStats(); } catch(e){} }
+  if(name === 'coord')  { try { coordRenderRouteStats(); coordRenderDecisionLog(); } catch(e){} }
+}
+
+function saveCfg(){
+  S.set('ATH_cfg_groq',    document.getElementById('cfg-groq').value);
+  S.set('ATH_cfg_backend', document.getElementById('cfg-backend').value);
+  alert('Saved ✓');
+}
+
+function renderUTAFull(){
+  var el = document.getElementById('uta-full-display');
+  if(!el) return;
+  try {
+    var st = ATH_STATE.getUTA();
+    var html = '';
+    ['E','D','S','P','I','W'].forEach(function(ax){
+      var v = st[ax] || 0;
+      html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">';
+      html += '<span style="width:14px;font-weight:700;color:var(--cyan)">' + ax + '</span>';
+      html += '<div style="flex:1;height:5px;background:var(--border2);border-radius:3px;overflow:hidden">';
+      html += '<div style="width:' + Math.round(v*100) + '%;height:100%;background:var(--violet);border-radius:3px"></div></div>';
+      html += '<span style="width:40px;text-align:right;font-size:.68rem;color:var(--text)">' + v.toFixed(3) + '</span></div>';
+    });
+    el.innerHTML = html;
+  } catch(e) { el.textContent = 'UTA not initialized'; }
+}
+
+function renderMemory(){
+  var el = document.getElementById('mem-list');
+  var ep = document.getElementById('ep-list');
+  try {
+    var frags = PERM_MEM.load().slice(0,20);
+    if(!frags.length){ el.innerHTML='<div style="font-style:italic">No fragments yet.</div>'; }
+    else {
+      el.innerHTML = frags.map(function(f){
+        return '<div style="padding:4px 0;border-bottom:1px solid var(--border)">' +
+               '<span style="color:var(--text);font-size:.65rem">' + escHtml((f._label||f.id||'').slice(0,40)) + '</span>' +
+               '<span style="float:right;color:var(--muted2);font-size:.58rem">conf:' + (f.confidence||0).toFixed(2) + '</span></div>';
+      }).join('');
+    }
+    var eps = ATH_STATE.getEpisodes().slice(0,10);
+    if(!eps.length){ ep.innerHTML='<div style="font-style:italic">No episodes yet.</div>'; }
+    else {
+      ep.innerHTML = eps.map(function(e,i){
+        return '<div style="padding:3px 0;border-bottom:1px solid var(--border);font-size:.62rem">' +
+               '#' + (i+1) + ' E:' + (e.E||.5).toFixed(2) + ' S:' + (e.S||.5).toFixed(2) + '</div>';
+      }).join('');
+    }
+  } catch(ex) { if(el) el.textContent = 'Memory error: ' + ex.message; }
+}
+
+function kernelProbe(){
+  var inp = document.getElementById('kernel-probe-input');
+  if(!inp || !inp.value.trim()) return;
+  var text = inp.value.trim();
+  var r    = KERNEL.process(text, {});
+  var el   = document.getElementById('kernel-probe-result');
+  if(!el) return;
+  var tCols = { REFLEXIVE:'var(--green)', PATTERN:'var(--gold)', CONSCIOUS:'var(--red)' };
+  var tc    = tCols[r.tier] || 'var(--cyan)';
+  el.innerHTML = '<div style="background:var(--bg3);border-radius:6px;padding:10px;border:1px solid var(--border2)">' +
+    '<div style="margin-bottom:6px"><div style="font-size:.55rem;color:var(--muted2);margin-bottom:2px">LANGUAGE</div>' +
+    '<div style="font-size:.72rem;font-weight:700;color:var(--cyan)">' + escHtml(r.packet.language.toUpperCase() + (r.packet.hinglish?' + HINGLISH':'')) + '</div></div>' +
+    '<div style="margin-bottom:6px"><div style="font-size:.55rem;color:var(--muted2);margin-bottom:2px">INTENT</div>' +
+    '<div style="font-size:.72rem;font-weight:700;color:var(--gold)">' + escHtml(r.intent.type.toUpperCase()) + ' <span style="font-size:.58rem;font-weight:400;color:var(--muted2)">' + Math.round((r.intent.confidence||0)*100) + '%</span></div></div>' +
+    '<div style="margin-bottom:6px"><div style="font-size:.55rem;color:var(--muted2);margin-bottom:2px">TIER</div>' +
+    '<div style="font-size:.72rem;font-weight:700;color:'+tc+'">' + escHtml(r.tier) + '</div></div>' +
+    '<div><div style="font-size:.55rem;color:var(--muted2);margin-bottom:4px">ROUTING</div>' +
+    r.routing.map(function(t){ return '<div style="font-size:.62rem;color:var(--text);padding:1px 0">→ ' + escHtml(t.target) + ' <span style="color:var(--muted2)">' + escHtml(t.action) + '</span></div>'; }).join('') +
+    '</div></div>';
+  KERNEL.renderLog('kernel-route-log');
+}
+
+function kernelRenderStats(){
+  var el = document.getElementById('kernel-lang-stats');
+  if(!el) return;
+  var stats = KERNEL.stats();
+  if(!stats.total){ el.innerHTML='<div style="font-style:italic;font-size:.63rem;color:var(--muted2)">No routing events yet.</div>'; return; }
+  function bar(obj, color){ return Object.keys(obj).map(function(k){
+    var pct = Math.round(obj[k]/stats.total*100);
+    return '<div style="display:flex;align-items:center;gap:6px;margin-bottom:3px"><span style="width:80px;font-size:.6rem;color:var(--text)">' + escHtml(k) + '</span><div style="flex:1;height:4px;background:var(--border2);border-radius:2px;overflow:hidden"><div style="width:'+pct+'%;height:100%;background:'+color+'"></div></div><span style="font-size:.57rem;color:var(--muted2);width:22px;text-align:right">'+obj[k]+'</span></div>';
+  }).join(''); }
+  el.innerHTML = '<div style="margin-bottom:8px;font-size:.6rem;color:var(--muted2)">Total: '+stats.total+'</div>' +
+    '<div style="font-size:.55rem;letter-spacing:2px;color:var(--cyan);margin-bottom:4px">LANGUAGES</div>' + bar(stats.langs,'var(--cyan)') +
+    '<div style="font-size:.55rem;letter-spacing:2px;color:var(--gold);margin-top:8px;margin-bottom:4px">INTENTS</div>' + bar(stats.intents,'var(--gold)') +
+    '<div style="font-size:.55rem;letter-spacing:2px;color:var(--violet);margin-top:8px;margin-bottom:4px">TIERS</div>' + bar(stats.tiers,'var(--violet)');
+}
+
+function coordRenderRouteStats(){ try{ if(typeof REFLEXIVE_ROUTER!=='undefined') REFLEXIVE_ROUTER.renderStats('coord-route-stats'); } catch(e){} }
+function coordRenderDecisionLog(){ try{ if(typeof DECISION_LOG_SYS!=='undefined') DECISION_LOG_SYS.renderLog('coord-decision-log','coord-decision-stats'); } catch(e){} }
+
+function oracleAsk(){
+  var inp = document.getElementById('oracle-input');
+  var feed = document.getElementById('oracle-feed');
+  if(!inp||!feed||!inp.value.trim()) return;
+  var q = inp.value.trim(); inp.value='';
+  feed.innerHTML += '<div style="color:var(--violet);margin:4px 0;font-size:.68rem">You: '+escHtml(q)+'</div>';
+  var kr = KERNEL.process(q,{});
+  feed.innerHTML += '<div style="color:var(--gold);margin:4px 0;font-size:.68rem">🔮 ['+kr.tier+'/'+kr.intent.type+']: Oracle requires API key for full response. Configure in CFG tab.</div>';
+  feed.scrollTop = feed.scrollHeight;
+}
+
+function runSelfTest(){
+  var el = document.getElementById('test-results');
+  if(!el) return;
+  var results = [];
+  function check(name, fn){
+    try{ var r = fn(); results.push({name:name, pass:!!r, detail:String(r)}); }
+    catch(e){ results.push({name:name, pass:false, detail:e.message}); }
+  }
+  check('Storage available', function(){ return S.available(); });
+  check('K keys defined',    function(){ return typeof K !== 'undefined' && K.PERM_MEM; });
+  check('KERNEL online',     function(){ return typeof KERNEL !== 'undefined' && KERNEL.version; });
+  check('ATH_STATE exists',  function(){ return typeof ATH_STATE !== 'undefined'; });
+  check('UTA module',        function(){ return typeof UTA !== 'undefined'; });
+  check('PERM_MEM module',   function(){ return typeof PERM_MEM !== 'undefined'; });
+  check('DECISION_LOG_SYS',  function(){ return typeof DECISION_LOG_SYS !== 'undefined'; });
+  check('REFLEXIVE_ROUTER',  function(){ return typeof REFLEXIVE_ROUTER !== 'undefined'; });
+  check('KERNEL lang detect',function(){
+    var r = KERNEL.detectLanguage('kya chal raha hai');
+    return r.primary === 'hinglish' || r.primary === 'hindi_roman';
+  });
+  check('KERNEL intent',     function(){
+    var r = KERNEL.classifyIntent('help me stuck');
+    return r.type === 'distress';
+  });
+  check('KERNEL S-gate 0.20',function(){
+    var pkt = KERNEL.createPacket('okay test',{});
+    var targets = KERNEL.route(pkt, {S:0.15});
+    return targets.some(function(t){ return t.action === 'stability_warning'; });
+  });
+  check('entitySpeak exists', function(){ return typeof entitySpeak === 'function'; });
+
+  var passes = results.filter(function(r){ return r.pass; }).length;
+  el.innerHTML = '<div style="margin-bottom:8px;font-size:.65rem;color:' + (passes===results.length?'var(--green)':'var(--gold)') + '">' +
+    passes + '/' + results.length + ' passed</div>' +
+    results.map(function(r){
+      return '<div style="padding:3px 0;border-bottom:1px solid var(--border);display:flex;gap:6px;align-items:center">' +
+        '<span>' + (r.pass?'✅':'❌') + '</span>' +
+        '<span style="flex:1;font-size:.62rem;color:var(--text)">' + escHtml(r.name) + '</span>' +
+        (r.pass ? '' : '<span style="font-size:.58rem;color:var(--red)">' + escHtml(r.detail.slice(0,40)) + '</span>') +
+        '</div>';
+    }).join('');
+}
+
+// Register Service Worker
+if('serviceWorker' in navigator) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('sw.js').then(function(reg) {
+      console.log('[SW] Registered:', reg.scope);
+    }).catch(function(e) {
+      console.warn('[SW] Registration failed:', e.message);
+    });
+  });
+}
+
+// Storage status check
+document.addEventListener('DOMContentLoaded', function() {
+  var el = document.getElementById('cfg-storage-status');
+  if(el) el.textContent = S.available() ? '✓ localStorage OK' : '⚠ In-memory only';
+  var groq = S.get('ATH_cfg_groq', '');
+  var back = S.get('ATH_cfg_backend', '');
+  if(groq && document.getElementById('cfg-groq')) document.getElementById('cfg-groq').value = groq;
+  if(back && document.getElementById('cfg-backend')) document.getElementById('cfg-backend').value = back;
+});
+</script>
+</body>
+</html>
